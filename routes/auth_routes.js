@@ -1,13 +1,25 @@
 const express = require("express");
 const router = express.Router();
 const supabse = require("../lib/db");
+require("dotenv").config();
 
 router.post("/signup", async(req, res)=>{
     try{
-        const {name, email, password} = req.body;
+        const {name, email, password, role, adminSecret} = req.body;
+        if(role === 'admin'){
+            if(adminSecret !=process.env.ADMIN_SIGNUP_SECRET){
+                return res.status(401).json({ error: "Unauthorized: Invalid Admin Secret" });
+            }
+        }
         const {data, error:authError} = await supabse.auth.signUp({
             email,
-            password
+            password, 
+            options:{
+                data:{
+                    full_name:name,
+                    role:role
+                }
+            }
         })
         if(authError) return res.status(400).json
         ({error:authError.message})
@@ -15,7 +27,8 @@ router.post("/signup", async(req, res)=>{
         const {error:tableError} = await supabse.from("myriad_users").insert({
         id:data.user.id,
         name,
-        email
+        email,
+        role:role
         });
 
         if(tableError) return res.status(400).json
@@ -57,7 +70,8 @@ router.post("/login", async(req, res)=>{
             user:{
                 id:tableData.id,
                 email:tableData.email,
-                name:tableData.name
+                name:tableData.name,
+                role:tableData.role
             },
             session:authData.session
         })
