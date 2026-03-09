@@ -111,4 +111,31 @@ router.put("/update_profile", async (req, res) => {
 
 
 
+
+router.put("/update_password", async (req, res) => {
+  try {
+    const { email, currentPassword, newPassword } = req.body;
+
+    // Check current password
+    const { data: authData, error: signInError } = await supabse.auth.signInWithPassword({
+      email,
+      password: currentPassword
+    });
+
+    if (signInError) return res.status(400).json({ error: "Current password is incorrect" });
+
+    // Update password
+    const { data, error: updateError } = await supabse.auth.updateUser({
+      password: newPassword
+    });
+
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
+    res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
 module.exports = router;
