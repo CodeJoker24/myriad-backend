@@ -84,21 +84,6 @@ router.post("/login", async(req, res)=>{
 })
 
 
-router.post("/check_password", async(req, res)=>{
-      try {
-    const { email, currentPassword } = req.body;
-    const { data: authData, error } = await supabse.auth.signInWithPassword({
-      email,
-      password: currentPassword
-    });
-
-    if (error) return res.json({ success: false });
-
-    res.json({ success: true });
-  } catch (err) {
-    res.status(500).json({ success: false, message: err.message });
-  }
-})
 
 router.put("/update_profile", async (req, res) => {
   try {
@@ -123,4 +108,7 @@ router.put("/update_profile", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
 module.exports = router;
