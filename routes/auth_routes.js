@@ -105,29 +105,20 @@ router.put("/update", async (req, res) => {
   try {
     const { email, name, phone, dateOfBirth, stateOfOrigin, address, newPassword } = req.body;
 
-    // 1. Get the user ID from email
-    const { data: userData, error: userError } = await supabase.auth.admin.getUserByEmail(email);
-    if (userError) return res.status(400).json({ error: userError.message });
-
-    const userId = userData.id;
-
-    // 2. Update password if provided
+    // 1. Update password if provided
     if (newPassword) {
-      const { data: pwdData, error: pwdError } = await supabase.auth.admin.updateUserById(userId, {
-        password: newPassword
-      });
-      if (pwdError) return res.status(400).json({ error: pwdError.message });
+      const { data, error } = await supabse.auth.updateUserByEmail(email, { password: newPassword });
+      if (error) return res.status(400).json({ error: error.message });
     }
 
-    // 3. Update user table
-    const { error: tableError } = await supabase.from("myriad_users")
+    // 2. Update user table
+    const { error: tableError } = await supabse.from("myriad_users")
       .update({ name, phone, dateOfBirth, stateOfOrigin, address })
       .eq("email", email);
 
     if (tableError) return res.status(400).json({ error: tableError.message });
 
     res.json({ success: true, message: "Profile updated successfully" });
-
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
