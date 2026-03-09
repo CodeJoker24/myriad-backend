@@ -100,29 +100,29 @@ router.post("/check_password", async(req, res)=>{
   }
 })
 
-
-router.put("/update", async (req, res) => {
+router.put("/update_profile", async (req, res) => {
   try {
-    const { email, name, phone, dateOfBirth, stateOfOrigin, address, newPassword } = req.body;
+    const { email, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
 
-    // 1. Update password if provided
-    if (newPassword) {
-      const { data, error } = await supabse.auth.updateUserByEmail(email, { password: newPassword });
-      if (error) return res.status(400).json({ error: error.message });
-    }
-
-    // 2. Update user table
-    const { error: tableError } = await supabse.from("myriad_users")
-      .update({ name, phone, dateOfBirth, stateOfOrigin, address })
+    const { error } = await supabse
+      .from("myriad_users")
+      .update({
+        name,
+        phone,
+        dateOfBirth,
+        stateOfOrigin,
+        address,
+        updated_at: new Date()
+      })
       .eq("email", email);
 
-    if (tableError) return res.status(400).json({ error: tableError.message });
+    if (error) return res.status(400).json({ error: error.message });
 
     res.json({ success: true, message: "Profile updated successfully" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
-
 
 module.exports = router;
