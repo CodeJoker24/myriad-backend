@@ -102,8 +102,46 @@ router.post("/check_password", async(req, res)=>{
 
 router.put("/update_profile", async (req, res) => {
   try {
-    const { email, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
 
+    const {
+      email,
+      name,
+      phone,
+      dateOfBirth,
+      stateOfOrigin,
+      address,
+      newPassword
+    } = req.body;
+
+    // get user id
+    const { data: userData, error: userError } = await supabse
+      .from("myriad_users")
+      .select("id")
+      .eq("email", email)
+      .single();
+
+    if (userError) {
+      return res.status(400).json({ error: userError.message });
+    }
+
+    const userId = userData.id;
+
+    // update password if provided
+    if (newPassword) {
+
+      const { error: passError } =
+        await supabse.auth.admin.updateUserById(
+          userId,
+          { password: newPassword }
+        );
+
+      if (passError) {
+        return res.status(400).json({ error: passError.message });
+      }
+
+    }
+
+    // update profile info
     const { error } = await supabse
       .from("myriad_users")
       .update({
@@ -116,12 +154,21 @@ router.put("/update_profile", async (req, res) => {
       })
       .eq("email", email);
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
 
-    res.json({ success: true, message: "Profile updated successfully" });
+    res.json({
+      success: true,
+      message: "Profile updated successfully"
+    });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message
+    });
+
   }
 });
 
