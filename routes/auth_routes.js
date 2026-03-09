@@ -102,19 +102,19 @@ router.post("/check_password", async(req, res)=>{
 
 router.put("/update_profile", async (req, res) => {
   try {
-    const { id, name, phone, dateOfBirth, stateOfOrigin, address, newPassword } = req.body;
-
-    const userId = id;
-
-    if (newPassword) {
-      const { error: passError } = await supabse.auth.admin.updateUserById(userId, { password: newPassword });
-      if (passError) return res.status(400).json({ error: passError.message });
-    }
+    const { email, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
 
     const { error } = await supabse
       .from("myriad_users")
-      .update({ name, phone, dateOfBirth, stateOfOrigin, address, updated_at: new Date() })
-      .eq("id", userId);
+      .update({
+        name,
+        phone,
+        dateOfBirth,
+        stateOfOrigin,
+        address,
+        updated_at: new Date()
+      })
+      .eq("email", email);
 
     if (error) return res.status(400).json({ error: error.message });
 
