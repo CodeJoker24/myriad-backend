@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const supabse = require("../lib/db");
 require("dotenv").config();
+const multer = require("multer");
+const storage = multer.memoryStorage();
+const upload = multer({storage});
 
 router.post("/signup", async(req, res)=>{
     try{
@@ -132,6 +135,49 @@ router.put("/update_password", async (req, res) => {
     if (updateError) return res.status(400).json({ error: updateError.message });
 
     res.json({ success: true, message: "Password updated successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+
+
+router.post("/upload_profile_image", upload.single("image"), async (req, res) => {
+  try {
+    const { email } = req.body;
+    const file = req.file;
+
+    if (!file) {
+      return res.status(400).json({ error: "No image uploaded" });
+    }
+
+    const fileName = `${Date.now()}-${file.originalname}`;
+
+    const { data, error } = await supabse.storage
+      .from("profile-images")
+      .upload(fileName, file.buffer, {
+        contentType: file.mimetype
+      });
+
+    if (error) return res.status(400).json({ error: error.message });
+
+    const { data: publicUrl } = supabse
+      .storage
+      .from("profile-images")
+      .getPublicUrl(fileName);
+
+    const imageUrl = publicUrl.publicUrl;
+
+    await supabse
+      .from("myriad_users")
+      .update({ avatar: imageUrl })
+      .eq("email", email);
+
+    res.json({
+      success: true,
+      imageUrl
+    });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
