@@ -147,20 +147,22 @@ router.put("/update_password", async (req, res) => {
 
 router.post("/upload_profile_image", upload.single("image"), async (req, res) => {
   try {
-    const { id } = req.body;
+    const { id } = req.body;  // now using ID instead of email
     const file = req.file;
 
-    if (!file) return res.status(400).json({ error: "No image uploaded" });
+    if (!file || !id) {
+      return res.status(400).json({ error: "Image file and user ID are required" });
+    }
 
     const fileName = `${Date.now()}-${file.originalname}`;
 
-    const { data, error } = await supabse.storage
+    const { data, error: uploadError } = await supabse.storage
       .from("profile-images")
       .upload(fileName, file.buffer, {
         contentType: file.mimetype
       });
 
-    if (error) return res.status(400).json({ error: error.message });
+    if (uploadError) return res.status(400).json({ error: uploadError.message });
 
     const { data: publicUrl } = supabse
       .storage
@@ -169,12 +171,16 @@ router.post("/upload_profile_image", upload.single("image"), async (req, res) =>
 
     const imageUrl = publicUrl.publicUrl;
 
-    await supabse
+    // Update user avatar by ID
+    const { error: updateError } = await supabse
       .from("myriad_users")
       .update({ avatar: imageUrl })
       .eq("id", id);
 
+    if (updateError) return res.status(400).json({ error: updateError.message });
+
     res.json({ success: true, imageUrl });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
