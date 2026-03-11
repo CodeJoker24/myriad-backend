@@ -90,7 +90,7 @@ router.post("/login", async(req, res)=>{
 
 router.put("/update_profile", async (req, res) => {
   try {
-    const { email, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
+    const { id, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
 
     const { error } = await supabse
       .from("myriad_users")
@@ -100,9 +100,10 @@ router.put("/update_profile", async (req, res) => {
         dateOfBirth,
         stateOfOrigin,
         address,
+        avatar, 
         updated_at: new Date()
       })
-      .eq("email", email);
+      .eq("id", id);
 
     if (error) return res.status(400).json({ error: error.message });
 
@@ -144,12 +145,10 @@ router.put("/update_password", async (req, res) => {
 
 router.post("/upload_profile_image", upload.single("image"), async (req, res) => {
   try {
-    const { email } = req.body;
+    const { id } = req.body;
     const file = req.file;
 
-    if (!file) {
-      return res.status(400).json({ error: "No image uploaded" });
-    }
+    if (!file) return res.status(400).json({ error: "No image uploaded" });
 
     const fileName = `${Date.now()}-${file.originalname}`;
 
@@ -171,13 +170,9 @@ router.post("/upload_profile_image", upload.single("image"), async (req, res) =>
     await supabse
       .from("myriad_users")
       .update({ avatar: imageUrl })
-      .eq("email", email);
+      .eq("id", id);
 
-    res.json({
-      success: true,
-      imageUrl
-    });
-
+    res.json({ success: true, imageUrl });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
