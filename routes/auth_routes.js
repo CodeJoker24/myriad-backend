@@ -90,7 +90,9 @@ router.post("/login", async(req, res)=>{
 
 router.put("/update_profile", async (req, res) => {
   try {
-    const { id, name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
+    const { id, name, phone, dateOfBirth, stateOfOrigin, address, avatar } = req.body;
+
+    if (!id) return res.status(400).json({ error: "User ID is required for update" });
 
     const { error } = await supabse
       .from("myriad_users")
@@ -100,7 +102,7 @@ router.put("/update_profile", async (req, res) => {
         dateOfBirth,
         stateOfOrigin,
         address,
-        avatar, 
+        avatar,
         updated_at: new Date()
       })
       .eq("id", id);
