@@ -71,29 +71,49 @@ router.post("/signup", async (req, res) => {
 /* =========================
    LOGIN
 ========================= */
-const { data: tableData, error: tableError, count } = await supabase
-  .from("myriad_users")
-  .select("*", { count: "exact" })
-  .eq("id", authData.user.id);
+router.post("/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
 
-if (tableError) return res.status(400).json({ error: tableError.message });
-if (!tableData || tableData.length === 0)
-  return res.status(404).json({ error: "User not found in table" });
-if (tableData.length > 1)
-  return res.status(500).json({ error: "Duplicate users found in table" });
+    const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-const userRecord = tableData[0];
+    if (authError) {
+      if (authError.message === "Email not confirmed") {
+        return res.status(400).json({ error: "Check your email for confirmation" });
+      }
+      return res.status(400).json({ error: authError.message });
+    }
 
-res.json({
-  message: "Login Successful",
-  user: {
-    id: userRecord.id,
-    email: userRecord.email,
-    name: userRecord.name,
-    role: userRecord.role,
-    avatar: userRecord.avatar
-  },
-  session: authData.session
+    const { data: tableData, error: tableError } = await supabase
+      .from("myriad_users")
+      .select("*")
+      .eq("id", authData.user.id);
+
+    if (tableError) return res.status(400).json({ error: tableError.message });
+    if (!tableData || tableData.length === 0)
+      return res.status(404).json({ error: "User not found in table" });
+    if (tableData.length > 1)
+      return res.status(500).json({ error: "Duplicate users found in table" });
+
+    const userRecord = tableData[0];
+
+    res.json({
+      message: "Login Successful",
+      user: {
+        id: userRecord.id,
+        email: userRecord.email,
+        name: userRecord.name,
+        role: userRecord.role,
+        avatar: userRecord.avatar,
+      },
+      session: authData.session,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 /* =========================
