@@ -2,9 +2,7 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../lib/db");
 require("dotenv").config();
-const multer = require("multer");
-const storage = multer.memoryStorage();
-const upload = multer({ storage });
+
 
 
 
@@ -42,13 +40,14 @@ router.post("/signup", async (req, res) => {
 });
 
 
+
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) return res.status(400).json({ error: signInError.message });
 
-    
     const { data: userRecord, error: tableError } = await supabase
       .from("myriad_users")
       .select("*")
@@ -72,5 +71,9 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 });
+
+
+
+
 
 module.exports = router;
