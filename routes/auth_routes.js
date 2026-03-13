@@ -6,9 +6,8 @@ const multer = require("multer");
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-/* =========================
-   SIGNUP
-========================= */
+
+
 router.post("/signup", async (req, res) => {
   try {
     const { name, email, password, role, adminSecret } = req.body;
@@ -42,16 +41,14 @@ router.post("/signup", async (req, res) => {
   }
 });
 
-/* =========================
-   LOGIN
-========================= */
+
 router.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
     const { data: authData, error: signInError } = await supabase.auth.signInWithPassword({ email, password });
     if (signInError) return res.status(400).json({ error: signInError.message });
 
-    // fetch user table record
+    
     const { data: userRecord, error: tableError } = await supabase
       .from("myriad_users")
       .select("*")
@@ -76,9 +73,8 @@ router.post("/login", async (req, res) => {
   }
 });
 
-/* =========================
-   UPDATE PROFILE
-========================= */
+
+
 router.put("/update_profile", async (req, res) => {
   try {
     const { id, name, phone, dateOfBirth, stateOfOrigin, address, avatar } = req.body;
@@ -96,9 +92,8 @@ router.put("/update_profile", async (req, res) => {
   }
 });
 
-/* =========================
-   UPDATE PASSWORD
-========================= */
+
+
 router.put("/update_password", async (req, res) => {
   try {
     const { email, currentPassword, newPassword } = req.body;
@@ -116,9 +111,8 @@ router.put("/update_password", async (req, res) => {
   }
 });
 
-/* =========================
-   UPLOAD PROFILE IMAGE
-========================= */
+
+
 router.post("/upload_profile_image", upload.single("image"), async (req, res) => {
   try {
     const { id } = req.body;
