@@ -72,6 +72,35 @@ router.post("/login", async (req, res) => {
 });
 
 
+router.put("/update-profile/:id", async(req, res)=>{
+  try{
+    const {id} = req.params;
+    const {name, phone, dateOfBirth, stateOfOrigin, address} = req.body;
+
+    const {data, error} = await supabase.from("myriad_users")
+    .update({
+      name,
+      phone,
+      dateOfBirth,
+      stateOfOrigin, 
+      address
+    }).
+    eq("id", id)
+    .select();
+
+    if(error){
+      return res.status(400).json({error: error.message});
+    } 
+
+    res.json({
+      message : "Profile updated successfully",
+      user:data[0]
+    });
+  }
+  catch(err){
+    res.status(500).json({error:"Server error:" + err.message})
+  }
+})
 
 
 module.exports = router;
