@@ -2,8 +2,7 @@ const express = require("express");
 const router = express.Router();
 const supabase = require("../lib/db");
 require("dotenv").config();
-const multer = require("multer");
-const upload = multer({ storage: multer.memoryStorage() });
+
 
 
 
@@ -72,35 +71,6 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
-
-router.put("/update-profile/:id", async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, phone, dob, state, address } = req.body;
-
-    const { data, error } = await supabase
-      .from("myriad_users")
-      .update({ 
-        name: name, 
-        phone: phone, 
-        dateOfBirth: dob,      
-        stateOfOrigin: state,  
-        address: address 
-      })
-      .eq("id", id)
-      .select();
-
-    if (error) return res.status(400).json({ error: error.message });
-
-    res.json({
-      message: "Profile updated successfully",
-      user: data[0]
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 
 
