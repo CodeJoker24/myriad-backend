@@ -72,7 +72,6 @@ router.post("/login", async (req, res) => {
 });
 
 
-
 router.put("/update-profile/:id", async (req, res) => {
   try {
     const { id } = req.params;
@@ -83,12 +82,16 @@ router.put("/update-profile/:id", async (req, res) => {
       .update({ name, phone, dateOfBirth, stateOfOrigin, address })
       .eq("id", id)
       .select();
-  
+
+    
+    console.log("Supabase Update Result:", { data, error });
+
     if (error) return res.status(400).json({ error: error.message });
 
     if (!data || data.length === 0) {
       return res.status(404).json({ error: "Update successful, but data retrieval blocked by RLS or ID mismatch." });
     }
+
     res.json({
       message: "Profile updated successfully",
       user: data[0] 
