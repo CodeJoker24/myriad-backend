@@ -72,35 +72,30 @@ router.post("/login", async (req, res) => {
 });
 
 
-router.put("/update-profile/:id", async(req, res)=>{
-  try{
-    const {id} = req.params;
-    const {name, phone, dateOfBirth, stateOfOrigin, address} = req.body;
 
-    const {data, error} = await supabase.from("myriad_users")
-    .update({
-      name,
-      phone,
-      dateOfBirth,
-      stateOfOrigin, 
-      address
-    }).
-    eq("id", id)
-    .select();
+router.put("/update-profile/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
 
-    if(error){
-      return res.status(400).json({error: error.message});
-    } 
+    const { data, error } = await supabase
+      .from("myriad_users")
+      .update({ name, phone, dateOfBirth, stateOfOrigin, address })
+      .eq("id", id)
+      .select();
+  
+    if (error) return res.status(400).json({ error: error.message });
 
+    if (!data || data.length === 0) {
+      return res.status(404).json({ error: "Update successful, but data retrieval blocked by RLS or ID mismatch." });
+    }
     res.json({
-      message : "Profile updated successfully",
-      user:data[0]
+      message: "Profile updated successfully",
+      user: data[0] 
     });
+  } catch (err) {
+    res.status(500).json({ error: "Server error: " + err.message });
   }
-  catch(err){
-    res.status(500).json({error:"Server error:" + err.message})
-  }
-})
-
+});
 
 module.exports = router;
