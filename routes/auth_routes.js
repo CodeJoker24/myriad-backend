@@ -116,6 +116,7 @@ router.put("/change-password/:id", async (req, res) => {
     );
 
     if (error) {
+      console.log("Supabase Auth Error:", error);
       return res.status(400).json({ error: error.message });
     }
 
