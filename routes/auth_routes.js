@@ -101,4 +101,32 @@ router.put("/update-profile/:id", async (req, res) => {
   }
 });
 
+
+
+
+router.put("/change-password/:id", async (req, res) => {
+  const { id } = req.params;
+  const { newPassword } = req.body;
+
+  try {
+    
+    const { data, error } = await supabase.auth.admin.updateUserById(
+      id,
+      { password: newPassword }
+    );
+
+    if (error) {
+      return res.status(400).json({ error: error.message });
+    }
+
+    res.status(200).json({ 
+      message: "Password updated successfully!",
+      user: data.user 
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+
 module.exports = router;
