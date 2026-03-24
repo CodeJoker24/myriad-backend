@@ -109,11 +109,7 @@ router.put("/change-password/:id", async (req, res) => {
   const { newPassword } = req.body;
 
   try {
-    
-    const { data, error } = await supabase.auth.admin.updateUserById(
-      id,
-      { password: newPassword }
-    );
+    const { data, error } = await supabase.auth.resetPasswordForEmail
 
     if (error) {
       console.log("Supabase Auth Error:", error);
