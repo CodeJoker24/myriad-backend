@@ -66,22 +66,14 @@ router.post("/login", async (req, res) => {
   }
 });
 
+
+
 router.put("/update-profile/:id", async (req, res) => {
  console.log("DEBUG - Body Received:", req.body);
   try {
     const { id } = req.params;
-    
-    // 1. MAKE SURE profile_image is in this list!
-    const { 
-      name, 
-      phone, 
-      dateOfBirth, 
-      stateOfOrigin, 
-      address, 
-      profile_image 
-    } = req.body;
+    const { name, phone, dateOfBirth, stateOfOrigin, address, profile_image} = req.body;
 
-    // 2. MAKE SURE profile_image is inside this .update() object!
     const { data, error } = await supabase
       .from("myriad_users")
       .update({ 
@@ -90,7 +82,7 @@ router.put("/update-profile/:id", async (req, res) => {
         dateOfBirth, 
         stateOfOrigin, 
         address, 
-        profile_image // <--- THIS IS THE KEY
+        profile_image 
       })
       .eq("id", id)
       .select();
