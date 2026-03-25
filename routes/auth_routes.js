@@ -58,12 +58,7 @@ router.post("/login", async (req, res) => {
 
     res.json({
       message: "Login Successful",
-      user: {
-        id: userRecord.id,
-        name: userRecord.name,
-        email: userRecord.email,
-        role: userRecord.role
-      },
+      user: userRecord,
       session: authData.session
     });
   } catch (err) {
@@ -71,26 +66,36 @@ router.post("/login", async (req, res) => {
   }
 });
 
-
 router.put("/update-profile/:id", async (req, res) => {
+ console.log("DEBUG - Body Received:", req.body);
   try {
     const { id } = req.params;
-    const { name, phone, dateOfBirth, stateOfOrigin, address } = req.body;
+    
+    // 1. MAKE SURE profile_image is in this list!
+    const { 
+      name, 
+      phone, 
+      dateOfBirth, 
+      stateOfOrigin, 
+      address, 
+      profile_image 
+    } = req.body;
 
+    // 2. MAKE SURE profile_image is inside this .update() object!
     const { data, error } = await supabase
       .from("myriad_users")
-      .update({ name, phone, dateOfBirth, stateOfOrigin, address })
+      .update({ 
+        name, 
+        phone, 
+        dateOfBirth, 
+        stateOfOrigin, 
+        address, 
+        profile_image // <--- THIS IS THE KEY
+      })
       .eq("id", id)
       .select();
 
-    
-    console.log("Supabase Update Result:", { data, error });
-
     if (error) return res.status(400).json({ error: error.message });
-
-    if (!data || data.length === 0) {
-      return res.status(404).json({ error: "Update successful, but data retrieval blocked by RLS or ID mismatch." });
-    }
 
     res.json({
       message: "Profile updated successfully",
