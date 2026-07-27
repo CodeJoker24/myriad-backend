@@ -11,28 +11,44 @@ const authRoutes = require("./routes/auth_routes");
 
 app.set('trust proxy', 1);
 
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, 
-  max: 5, 
-  standardHeaders: true, 
-  legacyHeaders: false, 
-  message: {
-  status: 429,
-  error: "Too many requests from this device. Please try again after 15 minutes."
-  }
-})
-
-app.use(limiter);
 
 app.use(cors());
 app.use(express.json());
-app.use("/api/auth_routes", authRoutes);
 
-app.get("/", (req, res)=>{
-    res.send("App is running!")
+
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 300,                 
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Too many requests from this device. Please slow down."
+  }
 });
 
-app.listen(PORT, ()=>{
-    console.log(`App is running bro on port http://127.0.0.1:${PORT}`)
-})
 
+app.use(globalLimiter);
+
+
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, 
+  max: 5,                  
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: {
+    status: 429,
+    error: "Too many login attempts from this device. Please try again after 15 minutes."
+  }
+});
+
+
+app.use("/api/auth_routes", authLimiter, authRoutes);
+
+app.get("/", (req, res) => {
+  res.send("App is running!");
+});
+
+app.listen(PORT, () => {
+  console.log(`App is running bro on port http://127.0.0.1:${PORT}`);
+});
